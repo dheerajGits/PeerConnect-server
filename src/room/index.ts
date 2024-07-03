@@ -28,7 +28,6 @@ class Room {
           },
         },
       });
-      console.log(addRoom);
       socket.join(roomId);
       socket.emit("room-created", { roomId: roomId, userId: User.id });
       console.log("user created a room");
