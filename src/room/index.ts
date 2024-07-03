@@ -4,29 +4,62 @@ import PrismaClient from "../utils/PrismaClient";
 
 const meetings = PrismaClient.meetings;
 
-export const roomHandler = (socket: Socket) => {
-  const createRoom = async () => {
-    const roomId = uuidV4();
-    const addRoom = await meetings.create({
+class Room {
+  public meetings = PrismaClient.meetings;
+  public user = PrismaClient.user;
+
+  public initializeRoom = (socket: Socket) => {
+    const createRoom = async () => {
+      const User = await user.create({
+        data: {
+          phone: "",
+          name: "",
+        },
+      });
+      const roomId = uuidV4();
+      const addRoom = await meetings.create({
+        data: {
+          id: roomId,
+          startDateTime: new Date(),
+          endDateTime: new Date(),
+          durationInHours: "1",
+          users: {
+            connect: {
+              id: User.id,
+            },
+          },
+        },
+      });
+      console.log(addRoom);
+      socket.join(roomId);
+      socket.emit("room-created", { roomId: roomId, userId: User.id });
+      console.log("user created a room");
+    };
+    socket.on("join-room", this.joinRoom);
+    socket.on("create-room", createRoom);
+  };
+
+  public joinRoom = async ({ id }: { id: string }) => {
+    // when the user joins a room we need to add him in the meeting
+    const User = await user.create({
       data: {
-        id: roomId,
-        startDateTime: new Date(),
-        endDateTime: new Date(),
-        durationInHours: "1",
+        phone: "",
+        name: "",
       },
     });
-    console.log(addRoom);
-    socket.join(roomId);
-    socket.emit("room-created", { roomId });
-    console.log("user created a room");
-  };
-
-  const joinRoom = ({ id }: { id: string }) => {
     console.log("user joined a room", id);
-    socket.join(id);
+    await meetings.update({
+      where: {
+        id: id,
+      },
+      data: {
+        users: {
+          connect: {
+            id: User.id,
+          },
+        },
+      },
+    });
   };
-
-  socket.on("join-room", joinRoom);
-
-  socket.on("create-room", createRoom);
-};
+}
+export default Room;
