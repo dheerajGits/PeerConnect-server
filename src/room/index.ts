@@ -2,22 +2,20 @@ import { Socket } from "socket.io";
 import { v4 as uuidV4 } from "uuid";
 import PrismaClient from "../utils/PrismaClient";
 
-const meetings = PrismaClient.meetings;
-
 class Room {
   public meetings = PrismaClient.meetings;
   public user = PrismaClient.user;
 
   public initializeRoom = (socket: Socket) => {
     const createRoom = async () => {
-      const User = await user.create({
+      const User = await this.user.create({
         data: {
           phone: "",
           name: "",
         },
       });
       const roomId = uuidV4();
-      const addRoom = await meetings.create({
+      const addRoom = await this.meetings.create({
         data: {
           id: roomId,
           startDateTime: new Date(),
@@ -41,14 +39,14 @@ class Room {
 
   public joinRoom = async ({ id }: { id: string }) => {
     // when the user joins a room we need to add him in the meeting
-    const User = await user.create({
+    const User = await this.user.create({
       data: {
         phone: "",
         name: "",
       },
     });
     console.log("user joined a room", id);
-    await meetings.update({
+    await this.meetings.update({
       where: {
         id: id,
       },
