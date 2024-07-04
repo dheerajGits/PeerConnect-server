@@ -23,9 +23,6 @@ io.on("connection", (socket) => {
   console.log("user is connected");
   const room = new Room();
   room.initializeRoom(socket);
-  socket.on("disconnect", () => {
-    console.log("user is disconnected");
-  });
 });
 server.listen(port, () => {
   console.log(`listening to server on port ${port}`);
