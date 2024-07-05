@@ -14,24 +14,40 @@ datasource db {
 }
 
 model User {
-  id          String     @id @default(cuid())
-  name        String?
-  email       String?
-  phone       String     @unique
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @default(now()) @updatedAt
-  metaData    Json?
-  Meetings    Meetings[]
-  Companies   Companies? @relation(fields: [companiesId], references: [id])
-  companiesId String?
+  id              String            @id @default(cuid())
+  name            String?
+  email           String?
+  phone           String            @unique
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @default(now()) @updatedAt
+  metaData        Json?
+  Meetings        Meetings[]
+  Companies       Companies?        @relation(fields: [companiesId], references: [id])
+  companiesId     String?
+  meetingAttendee MeetingAttendee[]
+}
+
+model MeetingAttendee {
+  id         String   @id @default(cuid())
+  name       String?
+  joinedAt   DateTime
+  leftAt     DateTime
+  meetingId  String
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  meeting    Meetings @relation(fields: [meetingsId], references: [id])
+  meetingsId String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
 }
 
 model Meetings {
-  id              String   @id @default(cuid())
-  startDateTime   DateTime
-  endDateTime     DateTime
-  users           User[]
-  durationInHours String
+  id               String            @id @default(cuid())
+  startDateTime    DateTime
+  endDateTime      DateTime
+  users            User[]
+  durationInHours  String
+  meetingAttendees MeetingAttendee[]
 }
 
 model Companies {
