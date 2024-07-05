@@ -41,7 +41,6 @@ class WSS {
   };
 
   public createUser = async (socket: Socket) => {
-    console.log("Hii");
     const User = await this.user.create({
       data: {
         phone: uuidV4(),
