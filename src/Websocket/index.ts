@@ -1,10 +1,31 @@
-import { Socket } from "socket.io";
+import { Socket, Server } from "socket.io";
 import { v4 as uuidV4 } from "uuid";
 import PrismaClient from "../utils/PrismaClient";
+import express from "express";
+import http from "http";
 
-class Room {
+class WSS {
   public meetings = PrismaClient.meetings;
   public user = PrismaClient.user;
+  public wss: Server;
+
+  constructor(port?: number) {
+    const app = express();
+    const server = http.createServer(app);
+    this.wss = new Server(server, {
+      cors: {
+        origin: "*",
+        methods: ["GET", "POST"],
+      },
+    });
+    server.listen(port || 3031, () => {
+      console.log(`WebSocket server listening on port ${port || 3031}`);
+    });
+    this.wss.on("connection", (socket: Socket) => {
+      console.log("User Connected");
+      this.initializeRoom(socket);
+    });
+  }
 
   public initializeRoom = (socket: Socket) => {
     socket.on("join-room", this.joinRoom);
@@ -20,6 +41,7 @@ class Room {
   };
 
   public createUser = async (socket: Socket) => {
+    console.log("Hii");
     const User = await this.user.create({
       data: {
         phone: uuidV4(),
@@ -82,4 +104,4 @@ class Room {
     });
   };
 }
-export default Room;
+export default WSS;
