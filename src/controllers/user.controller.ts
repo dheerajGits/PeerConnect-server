@@ -6,7 +6,7 @@ class UserControllers {
   public getAllUsersInMeeting = async (req: Request, res: Response) => {
     try {
       const meetingId = req.params.meetingId as string;
-      if (meetingId) {
+      if (!meetingId) {
         res.status(400).send({ message: "meeting ID not specified" });
         return;
       }

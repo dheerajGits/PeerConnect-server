@@ -18,9 +18,7 @@ class WSS {
         methods: ["GET", "POST"],
       },
     });
-    server.listen(port || 3031, () => {
-      console.log(`WebSocket server listening on port ${port || 3031}`);
-    });
+    server.listen(port || 3031);
     this.wss.on("connection", (socket: Socket) => {
       console.log("User Connected");
       this.initializeRoom(socket);
