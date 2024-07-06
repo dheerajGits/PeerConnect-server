@@ -11,7 +11,7 @@ app.use(cors);
 
 const server = http.createServer(app);
 const WebSocketPort = 3031;
-new WSS(WebSocketPort); // initialized
+new WSS(WebSocketPort); // initialized websocket server
 
 server.listen(port, () => {
   console.log(`listening to server on port ${port}`);
