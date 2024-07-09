@@ -2,11 +2,14 @@ import { Socket, Server } from "socket.io";
 import { v4 as uuidV4 } from "uuid";
 import PrismaClient from "../utils/PrismaClient";
 import express from "express";
+import AttendeeServices from "../services/Attendee.services";
 import http from "http";
 
 class WSS {
   public meetings = PrismaClient.meetings;
   public user = PrismaClient.user;
+  public participants = PrismaClient.meetingAttendee;
+  public attendeeServices = new AttendeeServices();
   public wss: Server;
 
   constructor(port?: number) {
@@ -67,34 +70,33 @@ class WSS {
         },
       },
     });
+    const participant = await this.attendeeServices.createAttendee(
+      meetingDetails.id,
+      User.id
+    );
     socket.join(meetingDetails.id);
     console.log("user created a room");
     socket.emit("room-created", {
       roomId: meetingDetails.id,
-      userId: User.id,
+      participantId: participant.id,
     });
   };
 
-  public joinRoom = async ({ id, userId }: { id: string; userId: string }) => {
-    console.log("A user with id: ", userId, " ,joined a room with id:", id);
-    if (!userId) {
-      // this will be used when the user joins using the link shared
-      const User = await this.user.create({
-        data: {
-          phone: uuidV4(),
-          name: "",
-        },
-      });
-      userId = User.id;
-    }
+  public joinRoom = async ({
+    id,
+    participantId,
+  }: {
+    id: string;
+    participantId: string;
+  }) => {
     await this.meetings.update({
       where: {
         id,
       },
       data: {
-        users: {
+        meetingAttendees: {
           connect: {
-            id: userId,
+            id: participantId,
           },
         },
       },
