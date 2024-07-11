@@ -11,6 +11,7 @@
         "src": "/(.*)",
         "dest": "/src/index.ts"
       }
-    ]
+    ],
+    "buildCommand": "npm run build && prisma generate"
   }
   
