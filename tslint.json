@@ -6,7 +6,8 @@
             "severity":"warning",
             "options":["debug","info","log","time","timeEnd","trace"]
         },
-        "no-unused-expression": false
+        "no-unused-expression": false,
+        "no-shadowed-variable": false
     },
     "jsRules":{}
 }

@@ -6,8 +6,8 @@ class AttendeeServices {
     const attendee = await this.attendees.create({
       data: {
         joinedAt: new Date(),
-        userId: userId,
-        meetingId: meetingId,
+        userId,
+        meetingId,
         meetingsId: meetingId,
         leftAt: new Date(),
       },
