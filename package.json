@@ -5,7 +5,8 @@
   "main": "dist/index.js",
   "scripts": {
     "prebuild": "tslint -c tslint.json -p tsconfig.json --fix",
-    "build": "tsc",
+    "postinstall": "prisma generate",
+    "build": "prisma generate && tsc",
     "watch": "tsc -w",
     "prestart": "npm run build",
     "start": "concurrently --kill-others \"npm run  watch\" \"nodemon .\" "
