@@ -9,7 +9,7 @@
     "routes": [
       {
         "src": "/(.*)",
-        "dest": "/src/.ts"
+        "dest": "/src/server.ts"
       }
     ],
     "buildCommand": "npm run build && prisma generate"
