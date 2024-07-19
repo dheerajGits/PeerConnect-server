@@ -21,3 +21,4 @@ class AttendeeController {
     }
   };
 }
+export default AttendeeController;

@@ -29,7 +29,21 @@ class WSS {
   }
 
   public initializeRoom = (socket: Socket) => {
-    socket.on("join-room", this.joinRoom);
+    socket.on(
+      "join-room",
+      ({
+        id,
+        participantId,
+        userId,
+      }: {
+        id: string;
+        participantId: string;
+        userId: string;
+      }) => {
+        console.log(id, "  ", participantId);
+        this.joinRoom(id, participantId, userId, socket);
+      }
+    );
     socket.on("create-room", () => {
       this.createRoom(socket);
     });
@@ -78,17 +92,25 @@ class WSS {
     console.log("user created a room");
     socket.emit("room-created", {
       roomId: meetingDetails.id,
+      userId: User.id,
       participantId: participant.id,
     });
   };
 
-  public joinRoom = async ({
-    id,
-    participantId,
-  }: {
-    id: string;
-    participantId: string;
-  }) => {
+  public joinRoom = async (
+    id: string,
+    participantId: string,
+    userId: string,
+    socket: Socket
+  ) => {
+    if (!participantId) {
+      // this means that the participant has not been created yet so we would be creating a participant
+      const participant = await this.attendeeServices.createAttendee(
+        id,
+        userId
+      );
+      participantId = participant.id;
+    }
     await this.meetings.update({
       where: {
         id,
@@ -101,6 +123,7 @@ class WSS {
         },
       },
     });
+    socket.join(id);
   };
 }
 export default WSS;
