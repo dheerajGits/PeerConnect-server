@@ -28,17 +28,17 @@ model User {
 }
 
 model MeetingAttendee {
-  id         String   @id @default(cuid())
+  id         String    @id @default(cuid())
   name       String?
   joinedAt   DateTime
-  leftAt     DateTime
+  leftAt     DateTime?
   meetingId  String
   userId     String
-  user       User     @relation(fields: [userId], references: [id])
-  meeting    Meetings @relation(fields: [meetingsId], references: [id])
+  user       User      @relation(fields: [userId], references: [id])
+  meeting    Meetings  @relation(fields: [meetingsId], references: [id])
   meetingsId String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @default(now()) @updatedAt
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @default(now()) @updatedAt
 }
 
 model Meetings {

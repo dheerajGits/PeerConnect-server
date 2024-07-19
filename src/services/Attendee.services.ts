@@ -7,10 +7,9 @@ class AttendeeServices {
     const attendee = await this.attendees.create({
       data: {
         joinedAt: new Date(),
-        userId: userId,
-        meetingId: meetingId,
+        userId,
+        meetingId,
         meetingsId: meetingId,
-        leftAt: new Date(),
       },
     });
     return attendee;
@@ -18,7 +17,7 @@ class AttendeeServices {
   public getAllLiveAttendees = async (meetingId: string): Promise<any> => {
     const attendees = await this.attendees.findMany({
       where: {
-        meetingId: meetingId,
+        meetingId,
       },
     });
     return attendees;
