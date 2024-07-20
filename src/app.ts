@@ -3,10 +3,11 @@ import http from "http";
 import cors from "cors";
 import WSS from "./Websocket";
 import bodyParser from "body-parser";
-
+import PeerJs from "./peerjs";
 class App {
   public port = 3030;
   public webSocketPort = 3031;
+  public peerJsServerPath = "/peerjs";
   public app: express.Application;
   public server: http.Server;
 
@@ -19,7 +20,13 @@ class App {
 
   public listen() {
     // this will be used to start the main and websocket server
+
     new WSS(this.webSocketPort); // initialized websocket server
+
+    // initialize peerjs server
+    const PeerJsServer = new PeerJs(this.server); // create instance to initialize peerjs server
+    PeerJsServer.intializePeerJsServerOnPath(this.app, this.peerJsServerPath);
+
     this.server.listen(this.port, () => {
       console.log(`------server listening on port ${this.port}--------`);
       console.log(

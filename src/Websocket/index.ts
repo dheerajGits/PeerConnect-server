@@ -10,18 +10,20 @@ class WSS {
   public user = PrismaClient.user;
   public participants = PrismaClient.meetingAttendee;
   public attendeeServices = new AttendeeServices();
+  public server: http.Server;
   public wss: Server;
+  public app: express.Application;
 
   constructor(port?: number) {
-    const app = express();
-    const server = http.createServer(app);
-    this.wss = new Server(server, {
+    this.app = express();
+    this.server = http.createServer(this.app);
+    this.wss = new Server(this.server, {
       cors: {
         origin: "*",
         methods: ["GET", "POST"],
       },
     });
-    server.listen(port || 3031);
+    this.server.listen(port || 3031);
     this.wss.on("connection", (socket: Socket) => {
       console.log("User Connected");
       this.initializeRoom(socket);
@@ -29,6 +31,7 @@ class WSS {
   }
 
   public initializeRoom = (socket: Socket) => {
+    // this is when user joins a room
     socket.on(
       "join-room",
       ({
@@ -44,26 +47,40 @@ class WSS {
         this.joinRoom(id, participantId, userId, socket);
       }
     );
+
+    // this when a user creates a room
     socket.on("create-room", () => {
       this.createRoom(socket);
     });
-    socket.on("disconnect", () => {
+
+    // this is when a user is disconnected
+    socket.on("disconnect", (data: any) => {
+      console.log(data);
       console.log("user is disconnected");
     });
-    socket.on("create-user", () => {
-      this.createUser(socket);
+
+    // this is when we need to create a user and attendee
+    socket.on("create-attendee", ({ meetingId }: { meetingId: string }) => {
+      this.createAttendee(socket, meetingId);
     });
   };
 
-  public createUser = async (socket: Socket) => {
+  public createAttendee = async (socket: Socket, meetingId: string) => {
     const User = await this.user.create({
       data: {
         phone: uuidV4(),
         name: "",
       },
     });
+    const attendee = await this.attendeeServices.createAttendee(
+      meetingId,
+      User.id
+    );
     console.log("user-created: ", User);
-    socket.emit("create-user-afterJoin", { userId: User.id });
+    socket.emit("create-user-afterJoin", {
+      userId: User.id,
+      participantId: attendee.id,
+    });
   };
   public createRoom = async (socket: Socket) => {
     const User = await this.user.create({
@@ -123,7 +140,21 @@ class WSS {
         },
       },
     });
+
     socket.join(id);
+
+    socket.to(id).emit("participant-joined", participantId);
+
+    socket.emit("get-users", {
+      participants: await this.attendeeServices.getAllLiveAttendees(id),
+    });
+
+    // handle on disconnect case
+    socket.on("disconnect", async () => {
+      await this.attendeeServices.removeAttendeeFromMeeting(participantId);
+
+      socket.to(id).emit("user-disconnected", { meetingId: id, participantId });
+    });
   };
 }
 export default WSS;
