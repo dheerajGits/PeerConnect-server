@@ -17,28 +17,31 @@ class AttendeeServices {
   public getAllLiveAttendees = async (meetingId: string): Promise<any> => {
     const attendees = await this.attendees.findMany({
       where: {
-        meetingId,
+        AND: [
+          {
+            meetingId,
+          },
+          {
+            leftAt: null,
+          },
+        ],
       },
     });
     return attendees;
   };
-  public removeAttendeeFromMeetings = async (
-    meetingId: string,
+  public removeAttendeeFromMeeting = async (
     attendeeId: string
   ): Promise<any> => {
-    const removedAttendee = await this.meetings.update({
+    // will be used by websocket event
+    const attendee = await this.attendees.update({
       where: {
-        id: meetingId,
+        id: attendeeId,
       },
       data: {
-        meetingAttendees: {
-          disconnect: {
-            id: attendeeId,
-          },
-        },
+        leftAt: new Date(),
       },
     });
-    return removedAttendee;
+    return attendee;
   };
 }
 export default AttendeeServices;
