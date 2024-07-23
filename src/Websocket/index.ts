@@ -53,8 +53,7 @@ class WSS {
     });
 
     // this is when a user is disconnected
-    socket.on("disconnect", (data: any) => {
-      console.log(data);
+    socket.on("disconnect", () => {
       console.log("user is disconnected");
     });
 
@@ -100,7 +99,6 @@ class WSS {
 
     socket.join(meetingId);
     socket.on("user-ready-to-be-called", (stream) => {
-      console.log("user-ready-to-be-called", stream);
       socket.to(meetingId).emit("participant-joined", participantId);
     });
 
@@ -120,8 +118,8 @@ class WSS {
     });
 
     socket.emit("create-user-afterJoin", {
-      userId: User.id,
-      participantId: attendee?.id,
+      user: User.id,
+      participant: attendee?.id,
     });
   };
   public createRoom = async (socket: Socket) => {
@@ -162,15 +160,13 @@ class WSS {
       });
     }
     socket.join(meetingDetails.id);
-    console.log("user created a room");
-    socket.on("user-ready-to-be-called", (stream) => {
-      console.log("user-ready-to-be-called", stream);
+    socket.on("user-ready-to-be-called", () => {
       socket.to(meetingDetails.id).emit("participant-joined", participant?.id);
     });
     socket.emit("room-created", {
       roomId: meetingDetails.id,
-      userId: User.id,
-      participantId: participant?.id,
+      User: User.id,
+      participant: participant?.id,
     });
   };
 
@@ -206,7 +202,6 @@ class WSS {
 
     socket.join(id);
     socket.on("user-ready-to-be-called", (stream) => {
-      console.log("user-ready-to-be-called", stream);
       socket.to(id).emit("participant-joined", participantId);
     });
 

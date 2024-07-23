@@ -60,10 +60,20 @@ class AttendeeServices {
     });
     return attendee;
   };
-  public findParticipantAvailabilty = async (filter: any) => {
+  public findParticipantAvailabilty = async (
+    participantId: string,
+    meetingId: string
+  ) => {
     const participantData = await this.attendees.findMany({
       where: {
-        ...filter,
+        AND: [
+          {
+            meetingId,
+          },
+          {
+            id: participantId,
+          },
+        ],
       },
     });
     return participantData;

@@ -2,7 +2,7 @@ import { Router } from "express";
 import UserControllers from "../controllers/user.controller";
 import AttendeeController from "../controllers/attendee.controller";
 
-class UserRoutes {
+class AttendeeRoutes {
   public router = Router();
   public path = "/attendees";
   public userController = new UserControllers();
@@ -12,14 +12,14 @@ class UserRoutes {
   }
   private initializeRoutes() {
     this.router.get(
-      `${this.path}/:meetingId`,
-      this.userController.getAllUsersInMeeting
+      `${this.path}/check-participant-registered`,
+      this.attendeeController.checkParticipantValidity
     );
     this.router.get(
-      `${this.router}/check-participant-registered/:id`,
-      this.attendeeController.checkParticipantValidity
+      `${this.path}/:meetingId`,
+      this.userController.getAllUsersInMeeting
     );
   }
 }
 
-export default UserRoutes;
+export default AttendeeRoutes;

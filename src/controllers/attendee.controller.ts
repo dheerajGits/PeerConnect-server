@@ -23,29 +23,18 @@ class AttendeeController {
 
   public checkParticipantValidity = async (req: Request, res: Response) => {
     try {
-      const participantId = req.params.id as string;
+      console.log("In participant route");
+      const participantId = req.query.participantId as string;
       const meetingId = req.query.meetingId as string;
-      let filter: any = [];
       if (participantId) {
         console.log("No participant id given");
         res.status(404).send({ message: "No participantId specified" });
       }
-      filter = [
-        ...filter,
-        {
-          id: participantId,
-        },
-      ];
-      if (meetingId) {
-        filter = [
-          ...filter,
-          {
-            meetingId,
-          },
-        ];
-      }
       const attendeeData =
-        await this.attendeeServices.findParticipantAvailabilty(filter);
+        await this.attendeeServices.findParticipantAvailabilty(
+          participantId,
+          meetingId
+        );
       if (attendeeData.length > 0) {
         res.status(202).send({ message: "participant present", data: true });
         return;
