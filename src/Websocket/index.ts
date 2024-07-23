@@ -25,7 +25,7 @@ class WSS {
     });
     this.server.listen(port || 3031);
     this.wss.on("connection", (socket: Socket) => {
-      console.log("User Connected");
+      // console.log("User Connected");
       this.initializeRoom(socket);
     });
   }
@@ -43,7 +43,6 @@ class WSS {
         participantId: string;
         userId: string;
       }) => {
-        console.log(id, "  ", participantId);
         this.joinRoom(id, participantId, userId, socket);
       }
     );
@@ -60,12 +59,21 @@ class WSS {
     });
 
     // this is when we need to create a user and attendee
-    socket.on("create-attendee", ({ meetingId }: { meetingId: string }) => {
-      this.createAttendee(socket, meetingId);
-    });
+    socket.on(
+      "create-attendee-and-join",
+      ({ meetingId }: { meetingId: string }) => {
+        this.createAttendeeAndJoin(socket, meetingId);
+      }
+    );
+
+    // to reinitiate a call when the call failed
+    // socket.on("call-to-peer-failed", (participantId: string) => {
+    //   console.log("renitiating-call-to participant with id: ", participantId);
+    //   socket.emit("reinitate-call", participantId);
+    // });
   };
 
-  public createAttendee = async (socket: Socket, meetingId: string) => {
+  public createAttendeeAndJoin = async (socket: Socket, meetingId: string) => {
     const User = await this.user.create({
       data: {
         phone: uuidV4(),
@@ -76,10 +84,44 @@ class WSS {
       meetingId,
       User.id
     );
-    console.log("user-created: ", User);
+    const participantId = attendee?.id;
+    await this.meetings.update({
+      where: {
+        id: meetingId,
+      },
+      data: {
+        meetingAttendees: {
+          connect: {
+            id: participantId,
+          },
+        },
+      },
+    });
+
+    socket.join(meetingId);
+    socket.on("user-ready-to-be-called", (stream) => {
+      console.log("user-ready-to-be-called", stream);
+      socket.to(meetingId).emit("participant-joined", participantId);
+    });
+
+    socket.emit("get-users", {
+      participants: await this.attendeeServices.getAllLiveAttendees(meetingId),
+    });
+
+    // handle on disconnect case
+    socket.on("disconnect", async () => {
+      await this.attendeeServices.removeAttendeeFromMeeting(
+        participantId ?? ""
+      );
+
+      socket
+        .to(meetingId)
+        .emit("user-disconnected", { meetingId, participantId });
+    });
+
     socket.emit("create-user-afterJoin", {
       userId: User.id,
-      participantId: attendee.id,
+      participantId: attendee?.id,
     });
   };
   public createRoom = async (socket: Socket) => {
@@ -105,12 +147,30 @@ class WSS {
       meetingDetails.id,
       User.id
     );
+    if (participant?.id) {
+      await this.meetings.update({
+        where: {
+          id: meetingDetails.id,
+        },
+        data: {
+          meetingAttendees: {
+            connect: {
+              id: participant.id,
+            },
+          },
+        },
+      });
+    }
     socket.join(meetingDetails.id);
     console.log("user created a room");
+    socket.on("user-ready-to-be-called", (stream) => {
+      console.log("user-ready-to-be-called", stream);
+      socket.to(meetingDetails.id).emit("participant-joined", participant?.id);
+    });
     socket.emit("room-created", {
       roomId: meetingDetails.id,
       userId: User.id,
-      participantId: participant.id,
+      participantId: participant?.id,
     });
   };
 
@@ -121,12 +181,15 @@ class WSS {
     socket: Socket
   ) => {
     if (!participantId) {
+      console.log("No participantId given");
       // this means that the participant has not been created yet so we would be creating a participant
       const participant = await this.attendeeServices.createAttendee(
         id,
         userId
       );
-      participantId = participant.id;
+      if (participant?.id) {
+        participantId = participant.id;
+      }
     }
     await this.meetings.update({
       where: {
@@ -142,8 +205,10 @@ class WSS {
     });
 
     socket.join(id);
-
-    socket.to(id).emit("participant-joined", participantId);
+    socket.on("user-ready-to-be-called", (stream) => {
+      console.log("user-ready-to-be-called", stream);
+      socket.to(id).emit("participant-joined", participantId);
+    });
 
     socket.emit("get-users", {
       participants: await this.attendeeServices.getAllLiveAttendees(id),

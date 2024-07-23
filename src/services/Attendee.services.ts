@@ -4,6 +4,21 @@ class AttendeeServices {
   public attendees = PrismaClient.meetingAttendee;
   public meetings = PrismaClient.meetings;
   public createAttendee = async (meetingId: string, userId: string) => {
+    const findAttendee = await this.attendees.findMany({
+      where: {
+        AND: [
+          {
+            userId,
+          },
+          {
+            meetingId,
+          },
+        ],
+      },
+    });
+    if (findAttendee.length > 0) {
+      return null;
+    }
     const attendee = await this.attendees.create({
       data: {
         joinedAt: new Date(),
@@ -14,6 +29,7 @@ class AttendeeServices {
     });
     return attendee;
   };
+
   public getAllLiveAttendees = async (meetingId: string): Promise<any> => {
     const attendees = await this.attendees.findMany({
       where: {
@@ -29,6 +45,7 @@ class AttendeeServices {
     });
     return attendees;
   };
+
   public removeAttendeeFromMeeting = async (
     attendeeId: string
   ): Promise<any> => {
@@ -42,6 +59,14 @@ class AttendeeServices {
       },
     });
     return attendee;
+  };
+  public findParticipantAvailabilty = async (filter: any) => {
+    const participantData = await this.attendees.findMany({
+      where: {
+        ...filter,
+      },
+    });
+    return participantData;
   };
 }
 export default AttendeeServices;
