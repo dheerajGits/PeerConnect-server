@@ -98,7 +98,8 @@ class WSS {
     });
 
     socket.join(meetingId);
-    socket.on("user-ready-to-be-called", (stream) => {
+    socket.on("user-ready-to-be-called", () => {
+      console.log("participant ready to be called");
       socket.to(meetingId).emit("participant-joined", participantId);
     });
 
@@ -201,7 +202,7 @@ class WSS {
     });
 
     socket.join(id);
-    socket.on("user-ready-to-be-called", (stream) => {
+    socket.on("user-ready-to-be-called", () => {
       socket.to(id).emit("participant-joined", participantId);
     });
 
