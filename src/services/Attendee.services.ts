@@ -78,5 +78,35 @@ class AttendeeServices {
     });
     return participantData;
   };
+  public findCameraEnabbled = async (meetingId: string) => {
+    const participants = await this.attendees.findMany({
+      where: {
+        AND: [
+          {
+            meetingId,
+          },
+          {
+            leftAt: null, // signifies that the participant has not left till now
+          },
+          {
+            isCameraOn: true,
+          },
+        ],
+      },
+    });
+    return participants;
+  };
+
+  public toggleCameraOn = async (participantId: string, value: boolean) => {
+    const participant = await this.attendees.update({
+      where: {
+        id: participantId,
+      },
+      data: {
+        isCameraOn: value,
+      },
+    });
+    return participant;
+  };
 }
 export default AttendeeServices;

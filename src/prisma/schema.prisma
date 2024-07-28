@@ -36,9 +36,21 @@ model MeetingAttendee {
   userId     String
   user       User      @relation(fields: [userId], references: [id])
   meeting    Meetings  @relation(fields: [meetingsId], references: [id])
+  isCameraOn Boolean   @default(false)
+  isHost     Boolean   @default(false)
+  hostId     String?
   meetingsId String
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @default(now()) @updatedAt
+  Host       Host[]
+}
+
+model Host {
+  id            String          @id @default(cuid())
+  meetingId     String
+  meeting       Meetings        @relation(fields: [meetingId], references: [id])
+  participantId String
+  participant   MeetingAttendee @relation(fields: [participantId], references: [id])
 }
 
 model Meetings {
@@ -47,8 +59,9 @@ model Meetings {
   endDateTime      DateTime
   name             String?
   users            User[]
-  durationInHours  String
+  meetingHosts     Host[]
   meetingAttendees MeetingAttendee[]
+  durationInHours  String
 }
 
 model Companies {
