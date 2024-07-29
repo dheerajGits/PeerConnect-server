@@ -4,17 +4,21 @@ import cors from "cors";
 import WSS from "./Websocket";
 import bodyParser from "body-parser";
 import PeerJs from "./peerjs";
+import UserRoutes from "./routes/user.routes";
+import AttendeeRoutes from "./routes/attendee.routes";
+import MeetingRoutes from "./routes/meeting.routes";
 class App {
   public port = 3030;
   public webSocketPort = 3031;
   public peerJsServerPath = "/peerjs";
   public app: express.Application;
   public server: http.Server;
+  public routes = [new UserRoutes(), new AttendeeRoutes(), new MeetingRoutes()];
 
-  constructor(routes: any) {
+  constructor() {
     this.app = express();
     this.server = http.createServer(this.app);
-    this.initializeRoutes(routes);
+    this.initializeRoutes(this.routes);
     this.initialzeMiddlewares();
   }
 
@@ -45,6 +49,7 @@ class App {
 
   public initializeRoutes(Routes: any) {
     console.log("Initializing routes");
+    console.log();
     Routes.map((Route: any) => {
       this.app.use("/", Route.router);
     });
