@@ -51,6 +51,8 @@ model Host {
   meeting       Meetings        @relation(fields: [meetingId], references: [id])
   participantId String
   participant   MeetingAttendee @relation(fields: [participantId], references: [id])
+
+  @@unique([meetingId, participantId])
 }
 
 model Meetings {

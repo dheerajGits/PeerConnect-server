@@ -1,8 +1,9 @@
 import PrismaClient from "../utils/PrismaClient";
-
+// utility class for handling db related logic for Meeting Attendees and host
 class AttendeeServices {
   public attendees = PrismaClient.meetingAttendee;
   public meetings = PrismaClient.meetings;
+  public hosts = PrismaClient.host;
   public createAttendee = async (meetingId: string, userId: string) => {
     const findAttendee = await this.attendees.findMany({
       where: {
@@ -108,5 +109,42 @@ class AttendeeServices {
     });
     return participant;
   };
+  public addHostInMeeting = async (
+    meetingId: string,
+    participantId: string
+  ) => {
+    const host = await this.hosts.create({
+      data: {
+        meetingId,
+        participantId,
+      },
+    });
+    // connect the host to the meeting
+    await this.meetings.update({
+      where: {
+        id: meetingId,
+      },
+      data: {
+        meetingHosts: {
+          connect: {
+            id: host.id,
+          },
+        },
+      },
+    });
+  };
+
+  public getMeetingHostsParticipantIds = async (meetingId: string) => {
+    const hosts = await this.hosts.findMany({
+      where: {
+        meetingId,
+      },
+      select: {
+        participantId: true,
+      },
+    });
+    return hosts;
+  };
 }
+
 export default AttendeeServices;
