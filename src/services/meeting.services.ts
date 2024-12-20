@@ -10,7 +10,7 @@ class MeetingServices {
   ) => {
     const meeting = await this.meetings.create({
       data: {
-        name: name,
+        name,
         endDateTime: new Date(endDateTime),
         startDateTime: new Date(startDateTime),
         durationInHours: duration,
