@@ -14,18 +14,17 @@ class WSS {
   public wss: Server;
   public app: express.Application;
 
-  constructor(port?: number) {
+  constructor(server: http.Server) {
     this.app = express();
-    this.server = http.createServer(this.app);
+    this.server = server;
     this.wss = new Server(this.server, {
       cors: {
         origin: "*",
         methods: ["GET", "POST"],
       },
     });
-    this.server.listen(port || 3031);
     this.wss.on("connection", (socket: Socket) => {
-      // console.log("User Connected");
+      console.log("User Connected");
       this.initializeRoom(socket);
     });
   }
@@ -66,10 +65,10 @@ class WSS {
     );
 
     // to reinitiate a call when the call failed
-    // socket.on("call-to-peer-failed", (participantId: string) => {
-    //   console.log("renitiating-call-to participant with id: ", participantId);
-    //   socket.emit("reinitate-call", participantId);
-    // });
+    socket.on("call-to-peer-failed", (participantId: string) => {
+      console.log("renitiating-call-to participant with id: ", participantId);
+      socket.emit("reinitate-call", participantId);
+    });
   };
 
   public createAttendeeAndJoin = async (socket: Socket, meetingId: string) => {
@@ -99,7 +98,6 @@ class WSS {
 
     socket.join(meetingId);
     socket.on("user-ready-to-be-called", () => {
-      console.log("participant ready to be called");
       socket.to(meetingId).emit("participant-joined", participantId);
     });
 
@@ -178,7 +176,6 @@ class WSS {
     socket: Socket
   ) => {
     if (!participantId) {
-      console.log("No participantId given");
       // this means that the participant has not been created yet so we would be creating a participant
       const participant = await this.attendeeServices.createAttendee(
         id,

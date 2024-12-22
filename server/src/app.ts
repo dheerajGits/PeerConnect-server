@@ -3,7 +3,6 @@ import http from "http";
 import cors from "cors";
 import WSS from "./Websocket";
 import bodyParser from "body-parser";
-import PeerJs from "./peerjs";
 import UserRoutes from "./routes/user.routes";
 import AttendeeRoutes from "./routes/attendee.routes";
 import MeetingRoutes from "./routes/meeting.routes";
@@ -25,17 +24,15 @@ class App {
   public listen() {
     // this will be used to start the main and websocket server
 
-    new WSS(this.webSocketPort); // initialized websocket server
+    new WSS(this.server); // initialized websocket server
 
     // initialize peerjs server
-    const PeerJsServer = new PeerJs(this.server); // create instance to initialize peerjs server
-    PeerJsServer.intializePeerJsServerOnPath(this.app, this.peerJsServerPath);
 
     this.server.listen(this.port, () => {
       console.log(`------server listening on port ${this.port}--------`);
       console.log(
         `------Websocket Listening on port ${
-          this.webSocketPort || 3031
+          this.webSocketPort || 3030
         }--------`
       );
     });

@@ -1,0 +1,10 @@
+{
+    "extends":"tslint:recommended",
+    "defaultSeverity":"warning",
+    "rules":{
+        "no-console":false,
+        "no-unused-expression": false,
+        "no-shadowed-variable": false
+    },
+    "jsRules":{}
+}
