@@ -4,6 +4,7 @@ class AttendeeServices {
   public attendees = PrismaClient.meetingAttendee;
   public meetings = PrismaClient.meetings;
   public hosts = PrismaClient.host;
+  public chats = PrismaClient.chat;
   public createAttendee = async (meetingId: string, userId: string) => {
     const findAttendee = await this.attendees.findMany({
       where: {
@@ -144,6 +145,32 @@ class AttendeeServices {
       },
     });
     return hosts;
+  };
+
+  public addParticipantChat = async (
+    meetingId: string,
+    participantId: string,
+    chatContent: string
+  ) => {
+    const meetingIdbyParticipantId = await this.attendees.findUnique({
+      where: {
+        id: participantId,
+      },
+      select: {
+        meetingId: true,
+      },
+    });
+    if (meetingId == meetingIdbyParticipantId?.meetingId) {
+      const chat = await this.chats.create({
+        data: {
+          participantId: participantId,
+          meetingId: meetingId,
+          message: chatContent,
+        },
+      });
+      return chat;
+    }
+    return null;
   };
 }
 

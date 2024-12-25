@@ -19,6 +19,10 @@ class AttendeeRoutes {
       `${this.path}/:meetingId`,
       this.userController.getAllUsersInMeeting
     );
+    this.router.post(
+      `${this.path}/add-chat`,
+      this.attendeeController.addChatFromParticipant
+    );
   }
 }
 

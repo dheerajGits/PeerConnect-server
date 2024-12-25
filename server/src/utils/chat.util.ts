@@ -1,16 +1,25 @@
 import { Socket } from "socket.io";
-import { InCallMessage } from "../Interfaces/InCallMessage";
-export function initializeChatModal(socket: Socket) {
-  socket.on("send-message", (roomId: string, messageBody: InCallMessage) => {
-    console.log("Message Recieved from room ", roomId, " ", messageBody);
-    broadcastMessage(roomId, messageBody, socket);
-  });
-}
+import { InCallMessageRecieved } from "../Interfaces/InCallMessage";
+class ChatUtil {
+  public socket: Socket;
+  constructor(socket: Socket) {
+    this.socket = socket;
+  }
+  public initializeChatModal = () => {
+    this.socket.on(
+      "send-message",
+      (roomId: string, messageBody: InCallMessageRecieved) => {
+        console.log("Message Recieved from room ", roomId, " ", messageBody);
+        this.broadcastMessage(roomId, messageBody);
+      }
+    );
+  };
 
-function broadcastMessage(
-  roomId: string,
-  messageBody: InCallMessage,
-  socket: Socket
-) {
-  socket.to(roomId).emit("message-recieved", messageBody);
+  public broadcastMessage = (
+    roomId: string,
+    messageBody: InCallMessageRecieved
+  ) => {
+    this.socket.to(roomId).emit("message-recieved", messageBody);
+  };
 }
+export default ChatUtil;

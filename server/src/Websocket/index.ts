@@ -4,7 +4,7 @@ import PrismaClient from "../utils/PrismaClient";
 import express from "express";
 import AttendeeServices from "../services/Attendee.services";
 import http from "http";
-import { initializeChatModal } from "../utils/chat.util";
+import ChatUtil from "../utils/chat.util";
 
 class WSS {
   public meetings = PrismaClient.meetings;
@@ -14,6 +14,7 @@ class WSS {
   public server: http.Server;
   public wss: Server;
   public app: express.Application;
+  public chatModule?: ChatUtil;
 
   constructor(server: http.Server) {
     this.app = express();
@@ -27,6 +28,8 @@ class WSS {
     this.wss.on("connection", (socket: Socket) => {
       console.log("User Connected");
       this.initializeRoom(socket);
+      this.chatModule = new ChatUtil(socket);
+      this.chatModule.initializeChatModal(); // initialize chat module to recieve and sent chat
     });
   }
 
@@ -70,7 +73,6 @@ class WSS {
       console.log("renitiating-call-to participant with id: ", participantId);
       socket.emit("reinitate-call", participantId);
     });
-    initializeChatModal(socket);
   };
 
   public createAttendeeAndJoin = async (socket: Socket, meetingId: string) => {

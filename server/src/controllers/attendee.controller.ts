@@ -23,7 +23,6 @@ class AttendeeController {
 
   public checkParticipantValidity = async (req: Request, res: Response) => {
     try {
-      console.log("In participant route");
       const participantId = req.query.participantId as string;
       const meetingId = req.query.meetingId as string;
       if (participantId) {
@@ -45,7 +44,31 @@ class AttendeeController {
         return;
       }
     } catch (e) {
+      res.status(404).send({ msg: "Error" });
       console.error("error in checking validity");
+    }
+  };
+
+  public addChatFromParticipant = async (req: Request, res: Response) => {
+    try {
+      const body = req.body;
+      const participantId = body[`participantId`] as string;
+      const chatContent = body[`message`] as string;
+      const meetingId = body[`meetingId`] as string;
+      const registerChat = await this.attendeeServices.addParticipantChat(
+        meetingId,
+        participantId,
+        chatContent
+      );
+      if (registerChat) {
+        res.status(202).send({ data: registerChat });
+        return;
+      } else {
+        res.status(401).send({ msg: "message not able to register" });
+      }
+    } catch (err) {
+      res.status(401).send({ msg: "message not able to register" });
+      return;
     }
   };
 }

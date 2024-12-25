@@ -43,14 +43,16 @@ model MeetingAttendee {
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @default(now()) @updatedAt
   Host       Host[]
-  Message    Message[]
+  chats      Chat[]
 }
 
-model Message {
+model Chat {
   id            String          @id @default(cuid())
   message       String
   participantId String
   participant   MeetingAttendee @relation(fields: [participantId], references: [id])
+  meetingId     String
+  meeting       Meetings        @relation(fields: [meetingId], references: [id])
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @default(now()) @updatedAt
 }
@@ -74,6 +76,7 @@ model Meetings {
   meetingHosts     Host[]
   meetingAttendees MeetingAttendee[]
   durationInHours  String
+  chats            Chat[]
 }
 
 model Companies {
