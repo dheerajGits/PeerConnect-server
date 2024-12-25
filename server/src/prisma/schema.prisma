@@ -43,6 +43,16 @@ model MeetingAttendee {
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @default(now()) @updatedAt
   Host       Host[]
+  Message    Message[]
+}
+
+model Message {
+  id            String          @id @default(cuid())
+  message       String
+  participantId String
+  participant   MeetingAttendee @relation(fields: [participantId], references: [id])
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @default(now()) @updatedAt
 }
 
 model Host {
