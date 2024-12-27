@@ -15,13 +15,13 @@ class AttendeeRoutes {
       `${this.path}/check-participant-registered`,
       this.attendeeController.checkParticipantValidity
     );
-    this.router.get(
-      `${this.path}/:meetingId`,
-      this.userController.getAllUsersInMeeting
-    );
     this.router.post(
       `${this.path}/add-chat`,
       this.attendeeController.addChatFromParticipant
+    );
+    this.router.get(
+      `${this.path}/:meetingId`,
+      this.userController.getAllUsersInMeeting
     );
   }
 }

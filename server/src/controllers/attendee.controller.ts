@@ -54,7 +54,7 @@ class AttendeeController {
       const body = req.body;
       const participantId = body[`participantId`] as string;
       const chatContent = body[`message`] as string;
-      const meetingId = body[`meetingId`] as string;
+      const meetingId = body[`roomId`] as string;
       const registerChat = await this.attendeeServices.addParticipantChat(
         meetingId,
         participantId,

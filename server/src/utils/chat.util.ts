@@ -9,7 +9,6 @@ class ChatUtil {
     this.socket.on(
       "send-message",
       (roomId: string, messageBody: InCallMessageRecieved) => {
-        console.log("Message Recieved from room ", roomId, " ", messageBody);
         this.broadcastMessage(roomId, messageBody);
       }
     );

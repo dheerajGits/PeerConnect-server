@@ -163,8 +163,8 @@ class AttendeeServices {
     if (meetingId == meetingIdbyParticipantId?.meetingId) {
       const chat = await this.chats.create({
         data: {
-          participantId: participantId,
-          meetingId: meetingId,
+          participantId,
+          meetingId,
           message: chatContent,
         },
       });

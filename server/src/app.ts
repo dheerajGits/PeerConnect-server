@@ -17,8 +17,8 @@ class App {
   constructor() {
     this.app = express();
     this.server = http.createServer(this.app);
-    this.initializeRoutes(this.routes);
     this.initialzeMiddlewares();
+    this.initializeRoutes(this.routes);
   }
 
   public listen() {
