@@ -41,18 +41,20 @@ class WSS {
         id,
         participantId,
         userId,
+        participantName,
       }: {
         id: string;
         participantId: string;
         userId: string;
+        participantName: string;
       }) => {
-        this.joinRoom(id, participantId, userId, socket);
+        this.joinRoom(id, participantId, userId, socket, participantName);
       }
     );
 
     // this when a user creates a room
-    socket.on("create-room", () => {
-      this.createRoom(socket);
+    socket.on("create-room", (participantName: string) => {
+      this.createRoom(socket, participantName);
     });
 
     // this is when a user is disconnected
@@ -63,8 +65,14 @@ class WSS {
     // this is when we need to create a user and attendee
     socket.on(
       "create-attendee-and-join",
-      ({ meetingId }: { meetingId: string }) => {
-        this.createAttendeeAndJoin(socket, meetingId);
+      ({
+        meetingId,
+        participantName,
+      }: {
+        meetingId: string;
+        participantName: string;
+      }) => {
+        this.createAttendeeAndJoin(socket, meetingId, participantName);
       }
     );
 
@@ -75,7 +83,11 @@ class WSS {
     });
   };
 
-  public createAttendeeAndJoin = async (socket: Socket, meetingId: string) => {
+  public createAttendeeAndJoin = async (
+    socket: Socket,
+    meetingId: string,
+    participantName: string
+  ) => {
     const User = await this.user.create({
       data: {
         phone: uuidV4(),
@@ -84,7 +96,8 @@ class WSS {
     });
     const attendee = await this.attendeeServices.createAttendee(
       meetingId,
-      User.id
+      User.id,
+      participantName
     );
     const participantId = attendee?.id;
     await this.meetings.update({
@@ -125,11 +138,11 @@ class WSS {
       participant: attendee?.id,
     });
   };
-  public createRoom = async (socket: Socket) => {
+  public createRoom = async (socket: Socket, participantName: string) => {
     const User = await this.user.create({
       data: {
         phone: uuidV4(),
-        name: "",
+        name: participantName,
       },
     });
     const meetingDetails = await this.meetings.create({
@@ -146,7 +159,8 @@ class WSS {
     });
     const participant = await this.attendeeServices.createAttendee(
       meetingDetails.id,
-      User.id
+      User.id,
+      participantName
     );
     if (participant?.id) {
       await this.meetings.update({
@@ -177,13 +191,15 @@ class WSS {
     id: string,
     participantId: string,
     userId: string,
-    socket: Socket
+    socket: Socket,
+    participantName: string
   ) => {
     if (!participantId) {
       // this means that the participant has not been created yet so we would be creating a participant
       const participant = await this.attendeeServices.createAttendee(
         id,
-        userId
+        userId,
+        participantName
       );
       if (participant?.id) {
         participantId = participant.id;

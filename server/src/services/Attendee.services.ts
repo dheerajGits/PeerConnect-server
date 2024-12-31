@@ -5,7 +5,11 @@ class AttendeeServices {
   public meetings = PrismaClient.meetings;
   public hosts = PrismaClient.host;
   public chats = PrismaClient.chat;
-  public createAttendee = async (meetingId: string, userId: string) => {
+  public createAttendee = async (
+    meetingId: string,
+    userId: string,
+    attendeeName: string
+  ) => {
     const findAttendee = await this.attendees.findMany({
       where: {
         AND: [
@@ -27,6 +31,7 @@ class AttendeeServices {
         userId,
         meetingId,
         meetingsId: meetingId,
+        name: attendeeName,
       },
     });
     return attendee;
