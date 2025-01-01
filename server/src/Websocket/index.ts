@@ -53,9 +53,12 @@ class WSS {
     );
 
     // this when a user creates a room
-    socket.on("create-room", (participantName: string) => {
-      this.createRoom(socket, participantName);
-    });
+    socket.on(
+      "create-room",
+      ({ participantName }: { participantName: string }) => {
+        this.createRoom(socket, participantName);
+      }
+    );
 
     // this is when a user is disconnected
     socket.on("disconnect", () => {

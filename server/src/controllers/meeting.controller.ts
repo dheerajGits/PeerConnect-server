@@ -38,7 +38,9 @@ class MeetingController {
       }
       const meeting = await this.meetingServices.findMeetingById(meetingId);
       res.status(202).send({ message: "find Unique", data: meeting });
-    } catch {}
+    } catch (e) {
+      res.status(400).send({ message: "error while fetching data" });
+    }
   };
 }
 

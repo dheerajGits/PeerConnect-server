@@ -10,7 +10,7 @@ class MeetingRoutes {
   }
   private initializeRoutes() {
     this.router.post(`${this.path}`, this.meetingController.createClass);
-    this.router.get(`${this.path}/:id`, this.meetingController.createClass);
+    this.router.get(`${this.path}/:id`, this.meetingController.getMeetingById);
   }
 }
 
